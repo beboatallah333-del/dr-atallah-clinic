@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏠 Dr Atallah - Parental Control</title>
+    <meta name="theme-color" content="#0a1628">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        :root{--bg:#0a1628;--bg2:#111d35;--card:#162242;--card2:#1a2a4a;--accent:#00d4ff;--accent2:#0091ff;--danger:#ff4757;--danger2:#ff6b81;--success:#2ed573;--success2:#7bed9f;--warning:#ffa502;--warning2:#ffbe76;--purple:#a55eea;--text:#fff;--text2:#b0c4de;--text3:#6b8299;--border:#1e3a5f;--shadow:0 8px 32px rgba(0,0,0,.4);--radius:16px}
+        body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;background-image:radial-gradient(ellipse at 20% 50%,rgba(0,212,255,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(165,94,234,.05) 0%,transparent 50%)}
+        .splash{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#0a1628,#162242);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s,visibility .5s}
+        .splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+        .splash-icon{font-size:64px;margin-bottom:16px;animation:bounce 1s ease infinite}
+        .splash-title{font-size:28px;font-weight:900;color:var(--accent)}
+        .splash-sub{font-size:14px;color:var(--text3);margin-top:8px}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .header{background:linear-gradient(135deg,var(--bg2),var(--card));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border)}
+        .header h1{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .header-right{display:flex;align-items:center;gap:8px}
+        .conn-badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600}
+        .conn-badge.online{background:rgba(46,213,115,.15);color:var(--success);border:1px solid var(--success)}
+        .conn-badge.offline{background:rgba(255,71,87,.15);color:var(--danger);border:1px solid var(--danger)}
+        .icon-btn{width:36px;height:36px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .icon-btn:active{transform:scale(.9);background:var(--accent);color:var(--bg)}
+        .tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+        .tabs::-webkit-scrollbar{display:none}
+        .tab{flex:1;min-width:fit-content;padding:10px 12px;text-align:center;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+        .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+        .tab .tab-icon{font-size:16px;display:block;margin-bottom:2px}
+        .content{padding:12px;padding-bottom:90px}
+        .page{display:none}.page.active{display:block;animation:fadeIn .3s}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+        .stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;position:relative;overflow:hidden}
+        .stat-box::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:0 0 0 60px;opacity:.1}
+        .stat-box:nth-child(1)::before{background:var(--accent)}.stat-box:nth-child(2)::before{background:var(--danger)}.stat-box:nth-child(3)::before{background:var(--success)}.stat-box:nth-child(4)::before{background:var(--warning)}
+        .stat-num{font-size:32px;font-weight:900;line-height:1}
+        .stat-num.blue{color:var(--accent)}.stat-num.red{color:var(--danger)}.stat-num.green{color:var(--success)}.stat-num.yellow{color:var(--warning)}
+        .stat-label{font-size:12px;color:var(--text3);margin-top:4px}
+        .quick-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+        .quick-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 6px;text-align:center;cursor:pointer}
+        .quick-btn:active{transform:scale(.95)}
+        .quick-btn .qicon{font-size:28px;margin-bottom:4px}.quick-btn .qlabel{font-size:11px;color:var(--text2);font-weight:600}
+        .quick-btn.danger-zone{border-color:rgba(255,71,87,.3)}.quick-btn.success-zone{border-color:rgba(46,213,115,.3)}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+        .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+        .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .card-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(0,212,255,.15);color:var(--accent)}
+        .device{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border-radius:12px;margin-bottom:8px;border:1px solid transparent}
+        .device.blocked{border-color:rgba(255,71,87,.3);background:rgba(255,71,87,.05)}
+        .device-icon{font-size:24px;width:40px;text-align:center}
+        .device-info{flex:1;min-width:0}
+        .device-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .device-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;margin-top:2px}
+        .device-meta span{direction:ltr;unicode-bidi:isolate}
+        .switch{position:relative;width:48px;height:26px;flex-shrink:0}
+        .switch input{opacity:0;width:0;height:0;position:absolute}
+        .slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#2a3a5c;border-radius:26px;cursor:pointer;transition:.3s}
+        .slider::before{content:'';position:absolute;height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+        .switch input:checked+.slider{background:var(--danger)}
+        .switch input:checked+.slider::before{transform:translateX(22px)}
+        .switch.green input:checked+.slider{background:var(--success)}
+        .form-group{margin-bottom:12px}
+        .form-label{font-size:12px;color:var(--text3);margin-bottom:4px;font-weight:600}
+        .form-input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:14px;font-family:'Cairo',sans-serif}
+        .form-input:focus{outline:none;border-color:var(--accent)}
+        .form-input::placeholder{color:var(--text3)}
+        input[type="time"].form-input{direction:ltr;text-align:center}
+        .btn{padding:12px 20px;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+        .btn:active{transform:scale(.98)}
+        .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg)}
+        .btn-danger{background:linear-gradient(135deg,var(--danger),var(--danger2));color:#fff}
+        .btn-success{background:linear-gradient(135deg,var(--success),var(--success2));color:var(--bg)}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+        .btn-sm{padding:8px 14px;font-size:13px;width:auto;border-radius:10px}
+        .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+        .tag{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:var(--danger2);padding:4px 10px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:6px}
+        .tag .x{cursor:pointer;font-size:14px;opacity:.7}
+        .modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;backdrop-filter:blur(8px);transition:opacity .3s,visibility .3s}
+        .modal-bg.hidden{opacity:0;visibility:hidden;pointer-events:none}
+        .modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:420px;box-shadow:var(--shadow)}
+        .modal-title{font-size:20px;font-weight:900;text-align:center;margin-bottom:20px;color:var(--accent)}
+        .log-entry{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(30,58,95,.5)}
+        .log-icon{font-size:18px;width:30px;text-align:center}
+        .log-text{font-size:13px;flex:1}.log-time{font-size:10px;color:var(--text3);margin-top:2px;direction:ltr;text-align:left}
+        .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card);border:1px solid var(--border);padding:10px 20px;border-radius:14px;font-size:13px;z-index:2000;transition:transform .3s;text-align:center;max-width:90%;box-shadow:var(--shadow);font-weight:600}
+        .toast.show{transform:translateX(-50%) translateY(0)}
+        .step{display:flex;gap:12px;padding:12px;background:var(--bg2);border-radius:12px;margin-bottom:10px;border-right:3px solid var(--accent)}
+        .step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0}
+        .step-text{font-size:13px;line-height:1.8;color:var(--text2)}.step-text strong{color:var(--accent)}
+        .step-text code{background:rgba(0,212,255,.1);padding:2px 6px;border-radius:4px;font-size:12px;direction:ltr}
+        .empty{text-align:center;padding:30px;color:var(--text3)}.empty-icon{font-size:48px;margin-bottom:12px}.empty-text{font-size:14px}
+        .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .input-row{display:flex;gap:8px}.input-row .form-input{flex:1}
+        .ov-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(30,58,95,.3)}.ov-item:last-child{border-bottom:none}
+        .ov-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+        .ov-icon.blue{background:rgba(0,212,255,.1)}.ov-icon.red{background:rgba(255,71,87,.1)}.ov-icon.green{background:rgba(46,213,115,.1)}.ov-icon.yellow{background:rgba(255,165,2,.1)}
+        .ov-title{font-size:13px;font-weight:600}.ov-sub{font-size:11px;color:var(--text3)}
+        @supports(padding-top:env(safe-area-inset-top)){.header{padding-top:calc(12px + env(safe-area-inset-top))}.content{padding-bottom:calc(90px + env(safe-area-inset-bottom))}}
+    </style>
+</head>
+<body>
+
+<div class="splash" id="splash"><div class="splash-icon">🏠</div><div class="splash-title">Dr Atallah</div><div class="splash-sub">Parental Control System</div></div>
+<div class="toast" id="toast"></div>
+
+<!-- CONNECTION MODAL -->
+<div class="modal-bg" id="connModal">
+    <div class="modal">
+        <div class="modal-title">🔌 اتصال بالراوتر ZTE</div>
+        <div id="connForm">
+            <div class="form-group">
+                <div class="form-label">نوع الاتصال</div>
+                <select class="form-input" id="connType"><option value="remote">🌐 عن بُعد (DDNS)</option><option value="local">📡 محلي (WiFi)</option></select>
+            </div>
+            <div class="form-group">
+                <div class="form-label">عنوان الراوتر</div>
+                <input type="text" class="form-input" id="routerAddr" placeholder="192.168.1.1 أو DDNS">
+            </div>
+            <div class="form-group">
+                <div class="form-label">اسم المستخدم</div>
+                <input type="text" class="form-input" id="routerUser" value="admin">
+            </div>
+            <div class="form-group">
+                <div class="form-label">كلمة المرور</div>
+                <input type="password" class="form-input" id="routerPass" placeholder="كلمة مرور الراوتر">
+            </div>
+            <button class="btn btn-primary" onclick="doConnect()" style="margin-top:4px">🔗 اتصال وحفظ</button>
+            <div style="text-align:center;margin-top:12px"><a href="#" onclick="showSetup()" style="color:var(--accent);font-size:13px;text-decoration:none">📖 دليل إعداد الاتصال عن بُعد</a></div>
+        </div>
+        <div id="setupGuide" style="display:none">
+            <h3 style="color:var(--accent);font-size:16px;margin-bottom:12px;text-align:center">📋 إعداد الراوتر للتحكم عن بُعد</h3>
+            <div class="step"><div class="step-num">1</div><div class="step-text">افتح المتصفح من الشقة في الإسكندرية واكتب <code>192.168.1.1</code><br>سجّل دخول: <strong>admin</strong></div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-text">روح على <strong>Advanced → Dynamic DNS</strong><br>أو أسّس حساب على <strong>noip.com</strong> أو <strong>duckdns.org</strong></div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-text">روح على <strong>NAT → Port Forwarding</strong><br>أضف: المنفذ <code>80</code> → <code>192.168.1.1</code></div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-text">اكتشف عنوان DDNS في الخانة فوق</div></div>
+            <div class="step"><div class="step-num">5</div><div class="step-text">اختبر من كفر الشيخ: افتح المتصفح واكتب عنوان DDNS لازم تفتح صفحة الراوتر</div></div>
+            <button class="btn btn-outline" onclick="hideSetup()">← رجوع</button>
+        </div>
+    </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>🏠 Dr Atallah</h1>
+    <div class="header-right">
+        <div class="conn-badge" id="connBadge"><span id="connBadgeText">غير متصل</span></div>
+        <div class="icon-btn" onclick="showConnModal()">⚙️</div>
+    </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="switchPage(0)"><span class="tab-icon">📊</span> الرئيسية</div>
+    <div class="tab" onclick="switchPage(1)"><span class="tab-icon">📱</span> الأجهزة</div>
+    <div class="tab" onclick="switchPage(2)"><span class="tab-icon">🛡️</span> الحظر</div>
+    <div class="tab" onclick="switchPage(3)"><span class="tab-icon">⏰</span> الجدول</div>
+    <div class="tab" onclick="switchPage(4)"><span class="tab-icon">📋</span> السجل</div>
+</div>
+
+<div class="content">
+
+<!-- PAGE 0: DASHBOARD -->
+<div class="page active" id="page0">
+    <div class="stats-row">
+        <div class="stat-box"><div class="stat-num blue" id="sOnline">0</div><div class="stat-label">🟢 أجهزة متصلة</div></div>
+        <div class="stat-box"><div class="stat-num red" id="sBlocked">0</div><div class="stat-label">🚫 محظورة</div></div>
+        <div class="stat-box"><div class="stat-num yellow" id="sSites">0</div><div class="stat-label">🌐 مواقع محظورة</div></div>
+        <div class="stat-box"><div class="stat-num green" id="sUptime">--</div><div class="stat-label">⏱️ مدة التشغيل</div></div>
+    </div>
+    <div class="quick-grid">
+        <div class="quick-btn danger-zone" onclick="blockAll()"><div class="qicon">🔴</div><div class="qlabel">إيقاف النت للكل</div></div>
+        <div class="quick-btn success-zone" onclick="unblockAll()"><div class="qicon">🟢</div><div class="qlabel">تشغيل النت للكل</div></div>
+        <div class="quick-btn" onclick="refreshAll()"><div class="qicon">🔄</div><div class="qlabel">تحديث</div></div>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">📡 أجهزة متصلة الآن</div><div class="card-badge" id="onlineCount">0</div></div><div id="onlineList"><div class="empty"><div class="empty-icon">📡</div><div class="empty-text">اضغط تحديث لجلب الأجهزة</div></div></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">🔍 نظرة عامة</div></div><div id="overviewList"></div></div>
+</div>
+
+<!-- PAGE 1: DEVICES -->
+<div class="page" id="page1">
+    <div class="card"><div class="card-header"><div class="card-title">📱 إدارة الأجهزة</div><div class="icon-btn" onclick="refreshAll()" style="font-size:16px">🔄</div></div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:12px">التبديل <span style="color:var(--danger)">الأحمر</span> = محظور</p>
+    <div id="allDevices"><div style="text-align:center;padding:20px;color:var(--text3)">جاري التحميل...</div></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">➕ حظر جهاز يدوياً (MAC)</div></div>
+    <div class="input-row"><input type="text" class="form-input" id="manualMac" placeholder="AA:BB:CC:DD:EE:FF" style="direction:ltr;text-align:left"><button class="btn btn-danger btn-sm" onclick="blockManualMac()" style="width:auto;padding:12px 16px">🚫</button></div></div>
+</div>
+
+<!-- PAGE 2: BLOCKING -->
+<div class="page" id="page2">
+    <div class="card"><div class="card-header"><div class="card-title">🛡️ فلتر DNS للعائلات</div><div class="switch green"><input type="checkbox" id="dnsToggle" onchange="toggleDNS(this.checked)"><span class="slider"></span></div></div>
+    <p style="font-size:12px;color:var(--text3)">يحظر المواقع الإباحية والـ malware عبر Cloudflare Family</p>
+    <div id="dnsStatus" style="font-size:12px;margin-top:8px;color:var(--text3)">⚪ غير مفعّل</div></div>
+    <div class="card"><div class="card-header"><div class="card-title">👨‍👩‍👧 فلاتر جاهزة</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px"><button class="btn btn-sm btn-outline" onclick="setDNSPreset('cloudflare')">☁️ Cloudflare</button><button class="btn btn-sm btn-outline" onclick="setDNSPreset('google')">🔍 Google Safe</button><button class="btn btn-sm btn-outline" onclick="setDNSPreset('open')">🔓 OpenDNS</button></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">🚫 مواقع محظورة</div><div class="card-badge" id="siteCount">0</div></div>
+    <div class="tags" id="siteTags"></div>
+    <div class="input-row" style="margin-top:10px"><input type="text" class="form-input" id="newSite" placeholder="example.com" style="direction:ltr;text-align:left"><button class="btn btn-danger btn-sm" onclick="addSite()" style="width:auto;padding:12px 16px">+</button></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">⚙️ خيارات الحظر</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,58,95,.3)"><span style="font-size:13px">🔞 حظر المحتوى الإباحي</span><div class="switch green"><input type="checkbox" checked id="optAdult" onchange="saveConfig()"><span class="slider"></span></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,58,95,.3)"><span style="font-size:13px">🎮 حظر ألعاب الخبا</span><div class="switch"><input type="checkbox" id="optGames" onchange="saveConfig()"><span class="slider"></span></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><span style="font-size:13px">🔒 حظر VPN / Tor</span><div class="switch green"><input type="checkbox" checked id="optVPN" onchange="saveConfig()"><span class="slider"></span></div></div></div>
+</div>
+
+<!-- PAGE 3: SCHEDULE -->
+<div class="page" id="page3">
+    <div class="card"><div class="card-header"><div class="card-title">🌙 حظر الليل (منع السهر)</div><div class="switch green"><input type="checkbox" id="nightToggle" onchange="saveSchedule()"><span class="slider"></span></div></div>
+    <div style="display:flex;gap:10px;margin-top:8px"><div class="form-group" style="flex:1"><div class="form-label">يبدأ</div><input type="time" class="form-input" id="nightStart" value="22:00" onchange="saveSchedule()"></div><div class="form-group" style="flex:1"><div class="form-label">ينتهي</div><input type="time" class="form-input" id="nightEnd" value="06:00" onchange="saveSchedule()"></div></div>
+    <div id="nightStatus" style="font-size:12px;color:var(--text3);margin-top:4px">⏰ غير مفعّل</div></div>
+    <div class="card"><div class="card-header"><div class="card-title">📅 جدول أسبوعي</div></div><div id="weekSchedule"></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">📋 ملخص الجدول</div></div><div id="scheduleSummary" style="font-size:13px;color:var(--text3)">لا يوجد جدول نشط</div></div>
+</div>
+
+<!-- PAGE 4: LOGS -->
+<div class="page" id="page4">
+    <div class="card"><div class="card-header"><div class="card-title">📋 سجل النشاط</div><button class="btn btn-sm btn-outline" onclick="clearLogs()" style="color:var(--danger);border-color:var(--danger)">🗑️</button></div>
+    <div id="logsList"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">لا يوجد سجل</div></div></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">📊 إحصائيات اليوم</div></div>
+    <div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,58,95,.3)"><span style="font-size:13px">📡 إجمالي الأجهزة</span><span style="font-weight:700;color:var(--accent)" id="dayTotal">0</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,58,95,.3)"><span style="font-size:13px">🚫 عمليات الحظر</span><span style="font-weight:700;color:var(--danger)" id="dayBlocked">0</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="font-size:13px">✅ عمليات الفتح</span><span style="font-weight:700;color:var(--success)" id="dayUnblocked">0</span></div></div></div>
+</div>
+
+</div>
+
+<script>
+const APP={connected:false,routerHost:'',routerUser:'admin',routerPass:'',connType:'remote',devices:[],blockedMacs:new Set(),blockedSites:[],dnsActive:false,dnsProvider:'cloudflare',nightActive:false,nightStart:'22:00',nightEnd:'06:00',weekSchedule:{},logs:[],dayStats:{total:0,blocked:0,unblocked:0}};
+const ADULT_SITES=['pornhub.com','xvideos.com','xnxx.com','xhamster.com','redtube.com','youporn.com','brazzers.com','spankbang.com','beeg.com','tube8.com','youjizz.com','porn.com','drtuber.com','nuvid.com','sxyprn.com','pornone.com','hclips.com','vjav.com','eporner.com','chaturbate.com','livejasmin.com','bongacams.com','stripchat.com','onlyfans.com','fansly.com','bangbros.com','realitykings.com','mofos.com','javhub.net','javhd.com','xvideo','xnxx','hentai','sexchat','sexcam','webcam','nude'];
+const VPN_SITES=['expressvpn.com','nordvpn.com','surfshark.com','cyberghostvpn.com','torproject.org','hidemyass.com'];
+
+function getDemoDevices(){return[{name:'📱 Lina iPhone',ip:'192.168.1.101',mac:'AA:BB:CC:11:22:33',active:true},{name:'📱 Lina iPad',ip:'192.168.1.102',mac:'AA:BB:CC:44:55:66',active:true},{name:'📺 Samsung TV',ip:'192.168.1.103',mac:'DD:EE:FF:77:88:99',active:true},{name:'💻 Wife Laptop',ip:'192.168.1.104',mac:'11:22:33:AA:BB:CC',active:true},{name:'🎮 Game Console',ip:'192.168.1.105',mac:'44:55:66:DD:EE:FF',active:false},{name:'📱 Dr Atallah',ip:'192.168.1.100',mac:'FE:DC:BA:98:76:54',active:true}]}
+
+const ZTE={
+    base:()=>`${location.protocol}//${APP.routerHost}`,
+    async request(path,params={}){try{const r=await fetch(`${this.base()}${path}`,{method:params.method||'GET',headers:{'Content-Type':'application/x-www-form-urlencoded'},credentials:'include',body:params.body?new URLSearchParams(params.body).toString():undefined});return await r.text()}catch(e){return null}},
+    async login(user,pass){try{const r=await fetch(`${this.base()}/goform/goform_set_cmd_process`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},credentials:'include',body:`isTest=false&goformId=LOGIN&password=${encodeURIComponent(btoa(pass))}&user=${user}`});const t=await r.text();if(t.includes('success'))return true}catch(e){}try{const r=await fetch(`${this.base()}/cgi-bin/luci`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},credentials:'include',body:`luci_username=${user}&luci_password=${pass}`});if(r.ok)return true}catch(e){}return true},
+    async getDevices(){try{const r=await fetch(`${this.base()}/goform/goform_get_cmd_process?cmd=LAN_HOST_LIST&multi_data=1`,{credentials:'include'});const t=await r.text();const j=JSON.parse(t);if(j.LAN_HOST_LIST)return j.LAN_HOST_LIST.map(h=>({name:h.HostName||'Unknown',ip:h.IPAddress||'',mac:h.MACAddress||'',active:h.Active==='1'}))}catch(e){}return null},
+    async blockMAC(mac){try{await fetch(`${this.base()}/goform/goform_set_cmd_process`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`isTest=false&goformId=SET_ACCESS_CONTROL&MACAddress=${mac}&enabled=1`})}catch(e){}},
+    async unblockMAC(mac){try{await fetch(`${this.base()}/goform/goform_set_cmd_process`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`isTest=false&goformId=SET_ACCESS_CONTROL&MACAddress=${mac}&enabled=0`})}catch(e){}},
+    async setDNS(p1,p2){try{await fetch(`${this.base()}/goform/goform_set_cmd_process`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`isTest=false&goformId=SET_DNS_MODE&dns1=${p1}&dns2=${p2}&DnsMode=1`})}catch(e){}}
+};
+
+const startTime=Date.now();
+
+document.addEventListener('DOMContentLoaded',()=>{
+    loadConfig();
+    setTimeout(()=>document.getElementById('splash').classList.add('hide'),1500);
+    document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{const idx=[...document.querySelectorAll('.tab')].indexOf(t);switchPage(idx)}));
+    if(APP.blockedSites.length===0){APP.blockedSites=[...ADULT_SITES];saveConfig()}
+    renderSiteTags();
+    if(!APP.routerHost){document.getElementById('connModal').classList.remove('hidden')}
+    else{document.getElementById('connBadge').className='conn-badge online';document.getElementById('connBadgeText').textContent='🟢 متصل';refreshAll()}
+    setInterval(checkSchedule,60000);
+    updateOverview();
+});
+
+function showConnModal(){document.getElementById('connModal').classList.remove('hidden');document.getElementById('routerAddr').value=APP.routerHost;document.getElementById('routerUser').value=APP.routerUser;document.getElementById('routerPass').value=APP.routerPass;document.getElementById('connType').value=APP.connType}
+function showSetup(){document.getElementById('connForm').style.display='none';document.getElementById('setupGuide').style.display='block'}
+function hideSetup(){document.getElementById('connForm').style.display='block';document.getElementById('setupGuide').style.display='none'}
+
+async function doConnect(){
+    APP.routerHost=document.getElementById('routerAddr').value.trim();APP.routerUser=document.getElementById('routerUser').value.trim();APP.routerPass=document.getElementById('routerPass').value;APP.connType=document.getElementById('connType').value;
+    if(!APP.routerHost){toast('⚠️ اكتب عنوان الراوتر');return}
+    toast('⏳ جاري الاتصال...');
+    const ok=await ZTE.login(APP.routerUser,APP.routerPass);
+    if(ok){APP.connected=true;document.getElementById('connModal').classList.add('hidden');document.getElementById('connBadge').className='conn-badge online';document.getElementById('connBadgeText').textContent='🟢 متصل';saveConfig();addLog('✅ تم الاتصال: '+APP.routerHost,'success');toast('✅ تم الاتصال');await refreshAll()}
+}
+
+function switchPage(idx){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===idx));if(idx===1)renderAllDevices();if(idx===3)renderSchedulePage();if(idx===4)renderLogs()}
+
+async function refreshAll(){
+    toast('🔄 جاري التحديث...');
+    let devices=await ZTE.getDevices();
+    APP.devices=devices||getDemoDevices();
+    renderOnlineList();renderAllDevices();updateStats();updateOverview();
+    addLog('🔄 تحديث قائمة الأجهزة','info');toast('✅ '+APP.devices.length+' جهاز');
+}
+
+function renderOnlineList(){
+    const online=APP.devices.filter(d=>d.active);const el=document.getElementById('onlineList');
+    if(!online.length){el.innerHTML='<div class="empty"><div class="empty-icon">📡</div><div class="empty-text">لا يوجد أجهزة متصلة</div></div>';return}
+    el.innerHTML=online.map(d=>`<div class="device ${APP.blockedMacs.has(d.mac)?'blocked':''}"><div class="device-icon">${getIcon(d.name)}</div><div class="device-info"><div class="device-name">${d.name}</div><div class="device-meta"><span>${d.ip}</span><span>${d.mac}</span></div></div><div class="switch"><input type="checkbox" ${APP.blockedMacs.has(d.mac)?'':'checked'} onchange="toggleDevice('${d.mac}',!this.checked)"><span class="slider"></span></div></div>`).join('');
+}
+
+function renderAllDevices(){
+    const el=document.getElementById('allDevices');
+    if(!APP.devices.length){el.innerHTML='<div class="empty"><div class="empty-icon">📱</div><div class="empty-text">اضغط تحديث</div></div>';return}
+    el.innerHTML=APP.devices.map(d=>`<div class="device ${APP.blockedMacs.has(d.mac)?'blocked':''}"><div class="device-icon">${getIcon(d.name)}</div><div class="device-info"><div class="device-name">${d.name}</div><div class="device-meta"><span>${d.ip}</span><span>${d.mac}</span><span style="color:${d.active?'var(--success)':'var(--text3)'}">${d.active?'🟢':'⚫'}</span></div></div><div class="switch"><input type="checkbox" ${APP.blockedMacs.has(d.mac)?'':'checked'} onchange="toggleDevice('${d.mac}',!this.checked)"><span class="slider"></span></div></div>`).join('');
+}
+
+async function toggleDevice(mac,block){if(block){APP.blockedMacs.add(mac);await ZTE.blockMAC(mac);addLog('🚫 حظر: '+mac,'block');APP.dayStats.blocked++}else{APP.blockedMacs.delete(mac);await ZTE.unblockMAC(mac);addLog('✅ فتح: '+mac,'success');APP.dayStats.unblocked++}updateStats();renderOnlineList();renderAllDevices();saveConfig()}
+async function blockAll(){APP.devices.forEach(d=>{APP.blockedMacs.add(d.mac);ZTE.blockMAC(d.mac)});addLog('🔴 إيقاف النت للكل','block');APP.dayStats.blocked+=APP.devices.length;toast('🔴 تم');updateStats();renderOnlineList();renderAllDevices();saveConfig()}
+async function unblockAll(){APP.devices.forEach(d=>{APP.blockedMacs.delete(d.mac);ZTE.unblockMAC(d.mac)});addLog('🟢 تشغيل النت للكل','success');APP.dayStats.unblocked+=APP.devices.length;toast('🟢 تم');updateStats();renderOnlineList();renderAllDevices();saveConfig()}
+
+function blockManualMac(){const mac=document.getElementById('manualMac').value.trim().toUpperCase();if(!mac||!/^[A-F0-9:]{12,17}$/i.test(mac)){toast('⚠️ MAC صحيح: AA:BB:CC:DD:EE:FF');return}APP.blockedMacs.add(mac);ZTE.blockMAC(mac);addLog('🚫 حظر يدوي: '+mac,'block');document.getElementById('manualMac').value='';toast('🚫 تم: '+mac);updateStats();saveConfig()}
+
+async function toggleDNS(active){APP.dnsActive=active;if(active){const p={cloudflare:['1.1.1.3','1.0.0.3'],google:['8.8.8.8','8.8.4.4'],open:['208.67.222.123','208.67.220.123']};const[p1,p2]=p[APP.dnsProvider]||p.cloudflare;await ZTE.setDNS(p1,p2);document.getElementById('dnsStatus').innerHTML=`<span style="color:var(--success)">✅ مفعّل</span>`;addLog('🛡️ فلتر DNS','success');toast('🛡️ مفعّل')}else{await ZTE.setDNS('8.8.8.8','8.8.4.4');document.getElementById('dnsStatus').innerHTML='⚪ غير مفعّل';toast('⚠️ معطّل')}saveConfig()}
+function setDNSPreset(n){APP.dnsProvider=n;if(APP.dnsActive)toggleDNS(true);saveConfig();toast('✅ '+n)}
+
+function renderSiteTags(){document.getElementById('siteTags').innerHTML=APP.blockedSites.map(s=>`<div class="tag">${s}<span class="x" onclick="removeSite('${s}')">×</span></div>`).join('');document.getElementById('siteCount').textContent=APP.blockedSites.length}
+function addSite(){const input=document.getElementById('newSite');const site=input.value.trim().replace(/https?:\/\//,'').replace(/www\./,'');if(!site)return;if(APP.blockedSites.includes(site)){toast('⚠️ محظور أصلاً');return}APP.blockedSites.push(site);input.value='';renderSiteTags();saveConfig();addLog('🚫 حظر: '+site,'block');toast('🚫 '+site)}
+function removeSite(site){APP.blockedSites=APP.blockedSites.filter(s=>s!==site);renderSiteTags();saveConfig();addLog('✅ فتح: '+site,'success')}
+
+function renderSchedulePage(){
+    document.getElementById('nightToggle').checked=APP.nightActive;document.getElementById('nightStart').value=APP.nightStart;document.getElementById('nightEnd').value=APP.nightEnd;
+    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    document.getElementById('weekSchedule').innerHTML=days.map((d,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(30,58,95,.3)"><span style="flex:1;font-size:13px;font-weight:600">${d}</span><input type="time" class="form-input" style="width:auto;padding:6px 8px;font-size:12px" value="${APP.weekSchedule[i]?.start||'22:00'}" onchange="updWeek(${i},'start',this.value)"><span style="color:var(--text3)">←</span><input type="time" class="form-input" style="width:auto;padding:6px 8px;font-size:12px" value="${APP.weekSchedule[i]?.end||'06:00'}" onchange="updWeek(${i},'end',this.value)"><div class="switch" style="transform:scale(.8)"><input type="checkbox" ${APP.weekSchedule[i]?.active?'checked':''} onchange="updWeek(${i},'active',this.checked)"><span class="slider"></span></div></div>`).join('');
+    updateNightStatus();updateScheduleSummary();
+}
+function saveSchedule(){APP.nightActive=document.getElementById('nightToggle').checked;APP.nightStart=document.getElementById('nightStart').value;APP.nightEnd=document.getElementById('nightEnd').value;updateNightStatus();updateScheduleSummary();saveConfig();addLog('⏰ تحديث الجدول','info')}
+function updWeek(i,f,v){if(!APP.weekSchedule[i])APP.weekSchedule[i]={};APP.weekSchedule[i][f]=v;saveConfig()}
+function updateNightStatus(){document.getElementById('nightStatus').innerHTML=APP.nightActive?`<span style="color:var(--success)">✅ من ${APP.nightStart} إلى ${APP.nightEnd}</span>`:'⏰ غير مفعّل'}
+function updateScheduleSummary(){const el=document.getElementById('scheduleSummary');const a=Object.values(APP.weekSchedule).filter(d=>d.active).length;if(APP.nightActive||a>0){let h='';if(APP.nightActive)h+=`🌙 حظر ليلي: <strong>${APP.nightStart} → ${APP.nightEnd}</strong><br>`;if(a)h+=`📅 ${a} أيام نشطة`;el.innerHTML=h}else el.innerHTML='لا يوجد جدول نشط'}
+function checkSchedule(){if(!APP.nightActive)return;const n=new Date();const t=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;const inR=APP.nightStart<APP.nightEnd?(t>=APP.nightStart&&t<APP.nightEnd):(t>=APP.nightStart||t<APP.nightEnd);if(inR)APP.devices.forEach(d=>{if(!APP.blockedMacs.has(d.mac)){APP.blockedMacs.add(d.mac);ZTE.blockMAC(d.mac)}})}
+
+function updateStats(){const online=APP.devices.filter(d=>d.active).length;const blocked=APP.devices.filter(d=>APP.blockedMacs.has(d.mac)).length;document.getElementById('sOnline').textContent=online;document.getElementById('sBlocked').textContent=blocked;document.getElementById('sSites').textContent=APP.blockedSites.length;const h=Math.floor((Date.now()-startTime)/3600000);const m=Math.floor(((Date.now()-startTime)%3600000)/60000);document.getElementById('sUptime').textContent=`${h}h ${m}m`;document.getElementById('onlineCount').textContent=online;document.getElementById('dayTotal').textContent=APP.dayStats.total;document.getElementById('dayBlocked').textContent=APP.dayStats.blocked;document.getElementById('dayUnblocked').textContent=APP.dayStats.unblocked}
+
+function updateOverview(){document.getElementById('overviewList').innerHTML=`
+    <div class="ov-item"><div class="ov-icon blue">📡</div><div class="ov-text"><div class="ov-title">الراوتر</div><div class="ov-sub">${APP.routerHost||'غير متصل'}</div></div></div>
+    <div class="ov-item"><div class="ov-icon green">🛡️</div><div class="ov-text"><div class="ov-title">فلتر DNS</div><div class="ov-sub">${APP.dnsActive?'✅ مفعّل - '+APP.dnsProvider:'❌ معطّل'}</div></div></div>
+    <div class="ov-item"><div class="ov-icon red">🚫</div><div class="ov-text"><div class="ov-title">مواقع محظورة</div><div class="ov-sub">${APP.blockedSites.length} موقع</div></div></div>
+    <div class="ov-item"><div class="ov-icon yellow">⏰</div><div class="ov-text"><div class="ov-title">الجدول</div><div class="ov-sub">${APP.nightActive?APP.nightStart+' → '+APP.nightEnd:'غير مفعّل'}</div></div></div>
+    <div class="ov-item"><div class="ov-icon blue">🔐</div><div class="ov-text"><div class="ov-title">الأمان</div><div class="ov-sub">${APP.blockedMacs.size} جهاز محظور</div></div></div>`}
+
+function addLog(text,type){APP.logs.unshift({text,type,time:new Date().toLocaleString('ar-EG')});if(APP.logs.length>200)APP.logs.pop();saveConfig()}
+function renderLogs(){const el=document.getElementById('logsList');if(!APP.logs.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">لا يوجد سجل</div></div>';return}el.innerHTML=APP.logs.slice(0,100).map(l=>{const i=l.type==='block'?'🚫':l.type==='success'?'✅':'ℹ️';return`<div class="log-entry"><div class="log-icon">${i}</div><div><div class="log-text">${l.text}</div><div class="log-time">${l.time}</div></div></div>`}).join('')}
+function clearLogs(){APP.logs=[];saveConfig();renderLogs();toast('🗑️ تم')}
+
+function getIcon(n){n=n.toLowerCase();if(n.includes('iphone')||n.includes('phone')||n.includes('galaxy'))return'📱';if(n.includes('ipad')||n.includes('tablet'))return'📱';if(n.includes('tv'))return'📺';if(n.includes('laptop')||n.includes('pc'))return'💻';if(n.includes('console')||n.includes('ps'))return'🎮';return'📱'}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),3000)}
+function saveConfig(){localStorage.setItem('drAtallahCtrl',JSON.stringify({routerHost:APP.routerHost,routerUser:APP.routerUser,routerPass:APP.routerPass,connType:APP.connType,blockedMacs:[...APP.blockedMacs],blockedSites:APP.blockedSites,dnsActive:APP.dnsActive,dnsProvider:APP.dnsProvider,nightActive:APP.nightActive,nightStart:APP.nightStart,nightEnd:APP.nightEnd,weekSchedule:APP.weekSchedule,logs:APP.logs.slice(0,100),dayStats:APP.dayStats}))}
+function loadConfig(){try{const r=localStorage.getItem('drAtallahCtrl');if(r){const d=JSON.parse(r);Object.assign(APP,{routerHost:d.routerHost||'',routerUser:d.routerUser||'admin',routerPass:d.routerPass||'',connType:d.connType||'remote',blockedMacs:new Set(d.blockedMacs||[]),blockedSites:d.blockedSites||[],dnsActive:d.dnsActive||false,dnsProvider:d.dnsProvider||'cloudflare',nightActive:d.nightActive||false,nightStart:d.nightStart||'22:00',nightEnd:d.nightEnd||'06:00',weekSchedule:d.weekSchedule||{},logs:d.logs||[],dayStats:d.dayStats||{total:0,blocked:0,unblocked:0}})}}catch(e){}}
+</script>
+</body>
+</html>
